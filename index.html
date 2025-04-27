@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Treasure Hunt</title>
+    <style>
+        /* #puzzle, #photo, #okButton, #hint, #passwordDiv, #puzzle2 { display: none; } */
+        /* General styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        h2, h3 {
+            color: #333;
+        }
+
+        /* Welcome section styling */
+        #welcomeSection {
+            display: block;
+            padding: 20px;
+            background-color: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Centered scanner container */
+        #scanner {
+            margin: 20px auto;
+        }
+
+        /* Modern button styling */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Style input fields */
+        input[type="text"], input[type="password"] {
+            width: 80%;
+            padding: 12px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        /* Responsive image styling */
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style for puzzle container */
+        #puzzle, #photo, #hint, #passwordDiv, #puzzle2 {
+            padding: 20px;
+            background-color: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        /* Responsive layout for smaller screens */
+        @media (max-width: 600px) {
+            button {
+                width: 100%;
+            }
+
+            input[type="text"], input[type="password"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Welcome Section -->
+    <div id="welcomeSection">
+        <img src="welcome.jpg" alt="Welcome to the Treasure Hunt" />
+        <button id="openScannerButton">Open Scanner</button>
+    </div>
+
+    <div id="scanner"></div>
+    
+    <!-- Password input section -->
+    <div id="passwordDiv">
+        <h3>Enter Team Password</h3>
+        <input type="text" id="teamPasswordInput" placeholder="Enter password" />
+        <button id="submitPassword">Submit Password</button>
+    </div>
+    
+    <div id="puzzle">
+        <h2>Puzzle: <span id="puzzleText"></span></h2>
+        <img id="questionImage" src="" alt="Puzzle Question Image" style="max-width: 300px;" />
+        <input type="text" id="answerInput" placeholder="Enter your answer" />
+        <button id="submitAnswer">Submit Answer</button>
+    </div>
+    <div id="puzzle2">
+        <h2>Puzzle: <span id="puzzleText2"></span></h2>
+        <img id="questionImage2" src="" alt="Puzzle Question Image" style="max-width: 300px;" />
+        <input type="text" id="answerInput1" placeholder="Enter your answer 1" />
+        <input type="text" id="answerInput2" placeholder="Enter your answer 2" />
+        <input type="text" id="answerInput3" placeholder="Enter your answer 3" />
+        <input type="text" id="answerInput4" placeholder="Enter your answer 4" />
+        <input type="text" id="answerInput5" placeholder="Enter your answer 5" />
+        <input type="text" id="answerInput6" placeholder="Enter your answer 6" />
+        <input type="text" id="answerInput7" placeholder="Enter your answer 7" />
+        <button id="submitAnswer2">Submit Answer</button>
+    </div>
+    <div id="photo">
+        <img id="photoImage" src="" alt="Puzzle Answer Photo" />
+        <button id="okButton">OK</button>
+    </div>
+    <div id="hint">
+        <h3>Hint for the next stage:</h3>
+        <p id="nextHint"></p>
+    </div>
+
+    <!-- Correct HTML5-Qrcode script -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <script>
+        // Modified puzzles object with hints and passwords for each team
+        const puzzles = {
+            "group1_qr0-John Bosco": { 
+                question: "How many triangles are selected?", 
+                answer: "3", 
+                image: "Group 1/photo1.jpg", 
+                questionImage: "photo1.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "bosco"
+            },
+            "group1_qr1-Dominic Savio": { 
+                question: "What is answer?", 
+                answer: "Bosco ponthokkan", 
+                image: "Group 1/photo2.jpg", 
+                questionImage: "puzzle1.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "bosco"
+            },
+            "group1_qr2-Mary Mazzarello": { 
+                question: "Provide at least 4 correct answers out of 7.", 
+                answer: ['isaiah','ubuntu','mary','by your light we see light','ministers','1968','i am the light of the world'], 
+                image: "Group 1/photo3.jpg", 
+                questionImage: "puzzle2.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "bosco"
+            },
+            "group1_qr3-Michele Rua": { 
+                question: "What is answer?", 
+                answer: "I am because we are", 
+                image: "Group 1/photo4.jpg", 
+                questionImage: "puzzle3.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "bosco"
+            },
+            "group1_qr4-Francesco Cagliero": { 
+                question: "What is answer?", 
+                answer: "By your light we see light", 
+                image: "Group 1/photo5.jpg", 
+                questionImage: "puzzle4.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "bosco"
+            },
+            "group1_qr5-Luigi Variara": { 
+                question: "What is answer?", 
+                answer: ["church","chapel"], 
+                image: "correct.jpg", 
+                questionImage: "puzzle5.jpg", 
+                hint: "Congratulations..... Go fast and collect your treasure.... Please Take a screenshot of this page.........",
+                password: "bosco"
+            },
+            "group2_qr0-Philip Rinaldi": { 
+                question: "How many triangles are selected?", 
+                answer: "3", 
+                image: "Group 2/photo1.jpg", 
+                questionImage: "photo1.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "vincent"
+            },
+            "group2_qr1-Giovanni Cagliero": { 
+                question: "What is answer?", 
+                answer: "Bosco ponthokkan", 
+                image: "Group 2/photo2.jpg", 
+                questionImage: "puzzle1.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "vincent"
+            },
+            "group2_qr2-Alberto Marvelli": { 
+                question: "Provide at least 4 correct answers out of 7.", 
+                answer: ['isaiah','ubuntu','mary','by your light we see light','ministers','1968','i am the light of the world'],
+                image: "Group 2/photo3.jpg", 
+                questionImage: "puzzle2.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "vincent"
+            },
+            "group2_qr3-Aloysius Versiglia": { 
+                question: "What is answer?", 
+                answer: "I am because we are", 
+                image: "Group 2/photo4.jpg", 
+                questionImage: "puzzle3.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "vincent"
+            },
+            "group2_qr4-Callistus Caravario": { 
+                question: "What is answer?", 
+                answer: "By your light we see light", 
+                image: "Group 2/photo5.jpg", 
+                questionImage: "puzzle4.jpg", 
+                hint: "Proceed to this location for the next clue..",
+                password: "vincent"
+            },
+            "group2_qr5-Joseph Quadrio": { 
+                question: "What is answer?", 
+                answer: ["church","chapel"], 
+                image: "correct.jpg", 
+                questionImage: "puzzle5.jpg", 
+                hint: "Congratulations..... Go fast and collect your treasure.... Please Take a screenshot of this page.........",
+                password: "vincent"
+            },
+            "group3_qr0-August Czartoryski": { 
+                question: "How many triangles are selected?", 
+                answer: "3", 
+                image: "Group 3/photo1.jpg", 
+                questionImage: "photo1.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "francis"
+            },
+            "group3_qr1-Andrea Beltrami": { 
+                question: "What is answer?", 
+                answer: "Bosco ponthokkan",
+                image: "Group 3/photo2.jpg",
+                questionImage: "puzzle1.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "francis"
+            },
+            "group3_qr2-Stephen Sandor": { 
+                question: "Provide at least 4 correct answers out of 7.", 
+                answer: ['isaiah','ubuntu','mary','by your light we see light','ministers','1968','i am the light of the world'],
+                image: "Group 3/photo3.jpg",
+                questionImage: "puzzle2.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "francis"
+            },
+            "group3_qr3-Arturo Alfieri": { 
+                question: "What is answer?", 
+                answer: "I am because we are",
+                image: "Group 3/photo4.jpg",
+                questionImage: "puzzle3.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "francis"
+            },
+            "group3_qr4-Sister Eusebia Palomino": { 
+                question: "What is answer?", 
+                answer: "By your light we see light",
+                image: "Group 3/photo5.jpg",
+                questionImage: "puzzle4.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "francis"
+            },
+            "group3_qr5-Louis Guanella": { 
+                question: "What is answer?", 
+                answer: ["church","chapel"],
+                image: "correct.jpg",
+                questionImage: "puzzle5.jpg",
+                hint: "Congratulations..... Go fast and collect your treasure.... Please Take a screenshot of this page.........",
+                password: "francis"
+            },
+            "group4_qr0-Pietro Ricaldone": { 
+                question: "How many triangles are selected?", 
+                answer: "3", 
+                image: "Group 4/photo1.jpg", 
+                questionImage: "photo1.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "gabriel"
+            },
+            "group4_qr1-Joseph Fagnano": { 
+                question: "What is answer?", 
+                answer: "Bosco ponthokkan",
+                image: "Group 4/photo2.jpg",
+                questionImage: "puzzle1.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "gabriel"
+            },
+            "group4_qr2-Bartolomeo Garelli": { 
+                question: "Provide at least 4 correct answers out of 7.", 
+                answer: ['isaiah','ubuntu','mary','by your light we see light','ministers','1968','i am the light of the world'],
+                image: "Group 4/photo3.jpg",
+                questionImage: "puzzle2.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "gabriel"
+            },
+            "group4_qr3-Peter Braido": { 
+                question: "What is answer?", 
+                answer: "I am because we are",
+                image: "Group 4/photo4.jpg",
+                questionImage: "puzzle3.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "gabriel"
+            },
+            "group4_qr4-Egidio Vigano": { 
+                question: "What is answer?", 
+                answer: "By your light we see light",
+                image: "Group 4/photo5.jpg",
+                questionImage: "puzzle4.jpg",
+                hint: "Proceed to this location for the next clue..",
+                password: "gabriel"
+            },
+            "group4_qr5-Attilio Giordani": { 
+                question: "What is answer?", 
+                answer: ["church","chapel"],
+                image: "correct.jpg",
+                questionImage: "puzzle5.jpg",
+                hint: "Congratulations..... Go fast and collect your treasure.... Please Take a screenshot of this page.........",
+                password: "gabriel"
+            }
+        };
+
+        let currentPuzzle = null;
+
+        // Function to start the QR scanner after welcome screen
+        document.getElementById("openScannerButton").addEventListener("click", function () {
+            document.getElementById("welcomeSection").style.display = 'none';
+            openScanner();
+        });
+
+        function openScanner() {
+            document.getElementById("scanner").style.display = 'block'; // Show scanner after welcome section
+            //Reset the value of answer input fields
+            document.getElementById("answerInput").value = "";
+            for (let i = 1; i <= 7; i++) {
+                document.getElementById("answerInput" + i).value = "";
+            }
+            // Create a new instance of the HTML5Qrcode
+            const html5QrCode = new Html5Qrcode("scanner");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                qrCodeMessage => {
+                    handleQRCode(qrCodeMessage);
+                    html5QrCode.stop();
+                },
+                errorMessage => {
+                    console.error(errorMessage);
+                }
+            ).catch(err => {
+                console.error(err);
+            });
+        }
+
+        function handleQRCode(qrCode) {
+            if (puzzles[qrCode]) {
+                currentPuzzle = puzzles[qrCode];
+                document.getElementById("puzzle").style.display = 'none';
+                document.getElementById("puzzle2").style.display = 'none';
+                document.getElementById("passwordDiv").style.display = 'block'; // Ask for the team password
+            }
+        }
+
+        document.getElementById("submitPassword").addEventListener("click", function () {
+            const passwordInput = document.getElementById("teamPasswordInput").value;
+            if (passwordInput.toLowerCase().trim() === currentPuzzle.password) {
+                if (typeof(currentPuzzle.answer) == 'object' && currentPuzzle.questionImage == "puzzle2.jpg" ) {
+                    document.getElementById("puzzleText2").innerText = currentPuzzle.question;
+                    document.getElementById("questionImage2").src = currentPuzzle.questionImage; // Set the question image
+                    document.getElementById("puzzle2").style.display = 'block';
+                }else{
+                    document.getElementById("puzzleText").innerText = currentPuzzle.question;
+                    document.getElementById("questionImage").src = currentPuzzle.questionImage; // Set the question image
+                    document.getElementById("puzzle").style.display = 'block';
+                }
+                // Correct password
+                document.getElementById("passwordDiv").style.display = 'none';
+            } else {
+                alert("Incorrect password!");
+            }
+        });
+
+        document.getElementById("submitAnswer").addEventListener("click", function () {
+            const answer = document.getElementById("answerInput").value;
+            if (typeof(currentPuzzle.answer) == 'object' && currentPuzzle.questionImage == "puzzle5.jpg" ) {
+                let result = currentPuzzle.answer.some(item => answer.toLowerCase().trim().includes(item));
+                // Check if the answer is correct by removing any leading/trailing spaces and removing the capitalizing for any of the correct answers
+                if (result) {
+                    document.getElementById("photoImage").src = currentPuzzle.image;
+                    document.getElementById("photo").style.display = 'block';
+                    document.getElementById("puzzle").style.display = 'none';
+                    document.getElementById("puzzle2").style.display = 'none';
+                    document.getElementById("nextHint").innerText = currentPuzzle.hint; // Set the hint for the next stage
+                    document.getElementById("hint").style.display = 'block'; // Show the hint
+                    return;
+                }
+                alert("Incorrect answer!");
+            }else{
+                // Check if the answer is correct by removing any leading/trailing spaces and removing the capitalizing
+                if (currentPuzzle.answer.toLowerCase().trim() === answer.toLowerCase().trim()) {
+                    document.getElementById("photoImage").src = currentPuzzle.image;
+                    document.getElementById("photo").style.display = 'block';
+                    document.getElementById("puzzle").style.display = 'none';
+                    document.getElementById("puzzle2").style.display = 'none';
+                    document.getElementById("nextHint").innerText = currentPuzzle.hint; // Set the hint for the next stage
+                    document.getElementById("hint").style.display = 'block'; // Show the hint
+                }  else {
+                    alert("Incorrect answer!");
+                }
+            }
+        });
+
+        document.getElementById("submitAnswer2").addEventListener("click", function () {
+            
+            // check if al least 4 answers are correct and Check if the answer is correct by removing any leading/trailing spaces and removing the capitalizing
+            let correctAnswers = 0;
+            for (let i = 1; i <= 7; i++) {
+                let answer = document.getElementById("answerInput" + i).value;
+                answer = answer.toLowerCase().trim();
+                if (currentPuzzle.answer.includes(answer)) {
+                    correctAnswers++;
+                }
+            }
+            // specifically check if the 3rd answer contains the word "mary"  then increment the correctAnswers
+            if (document.getElementById("answerInput3").value.toLowerCase().includes("mary")) {
+                correctAnswers++;
+            }
+
+            if (correctAnswers >= 4) {
+                document.getElementById("photoImage").src = currentPuzzle.image;
+                document.getElementById("photo").style.display = 'block';
+                document.getElementById("puzzle2").style.display = 'none';
+                document.getElementById("nextHint").innerText = currentPuzzle.hint; // Set the hint for the next stage
+                document.getElementById("hint").style.display = 'block'; // Show the hint
+            } else {
+                alert("A minimum of 4 needs to be correct!");
+            }
+        });
+
+        document.getElementById("okButton").addEventListener("click", function () {
+            if (currentPuzzle.questionImage != "puzzle5.jpg") {
+                document.getElementById("photo").style.display = 'none';
+                openScanner();  // Reopen the scanner for the next QR code
+            }
+            else {
+                alert("Congratulations! You have completed the treasure hunt. Please take a screenshot of this page and show it to the organizers to collect your prize.");
+                //document.getElementById("photo").style.display = 'none';
+            }
+        });
+
+        // // Start by opening the scanner
+        // openScanner();
+    </script>
+
+</body>
+</html>
